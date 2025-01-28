@@ -15,7 +15,6 @@ public class Task {
     private Boolean completed = false;
 
     // Getter and Setter
-    // Getters and Setters
     public Long getId() {
         return id;
     }
