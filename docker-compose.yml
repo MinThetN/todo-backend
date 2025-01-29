@@ -1,0 +1,104 @@
+## This is a docker-compose file that is used to run the backend and database in the same network.
+#services:
+#  # Backend Spring Boot application
+#  app:
+#    container_name: todo-container
+#    # Build the Docker image from the Dockerfile in the current directory.
+#    build: .
+#
+#    # Expose port 8080 to host machine
+#    ports:
+#      - "8081:8080"
+#
+#    # Define the dependencies of the app service.
+#    depends_on:
+#      - mysqldb
+#      # This is service name, you can set any service names instead of postgresqldb.
+#
+#    # Define environment variables for the app service.
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/tasks
+#      SPRING_DATASOURCE_USERNAME: root
+#      SPRING_DATASOURCE_PASSWORD: minthetnaung
+#      # In your backend application.properties file, change the database URL
+#      # from localhost to the service name "postgresqldb" defined in this file.
+#      # E.g., spring.datasource.url=jdbc:postgresql://postgresqldb:5432/todo_management
+#
+#    # Connect the app service to the custom network "app_network".
+#    networks:
+#      - app_network
+#
+#  # PostgreSQL database service
+#  mysqldb:
+#    # Use the official postgres image from the Docker Hub registry.
+#    image: mysql:8.0
+#
+#    container_name: mysql-container
+#    # Mount a volume to persist the data. The volume is created using the postgres_data volume driver.
+#    volumes:
+#      - mysql_data:/var/lib/mysql
+#    environment:
+#      # POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD are environment variables that are used to create a database, user, and password in the postgres container.
+#      MYSQL_ROOT_PASSWORD: minthetnaung
+#
+#    # Expose port 5432 to host machine
+#    ports:
+#      - "3307:3306"
+#
+##    # Define a health check for the postgresqldb service.
+##    healthcheck:
+##      test: ["CMD-SHELL", "pg_isready -U postgres"]
+##      interval: 10s
+##      timeout: 5s
+##      retries: 5
+#
+#    # Connect the postgresqldb service to the custom network "app_network".
+#    networks:
+#      - app_network
+#
+## Create a volume to persist the data
+#volumes:
+#  mysql_data:
+#
+## Define a custom network
+#networks:
+#  app_network:
+#    driver: bridge
+
+version: '3.8'
+services:
+  app:
+    container_name: todo-container
+    build: .
+    ports:
+      - "8081:8080"  # Maps port 8081 on the host to port 8080 on the container
+    depends_on:
+      - mysqldb  # Ensures that the MySQL database is started before the app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/tasks  # Ensure this matches the database name
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: minthetnaung
+    networks:
+      - app_network
+
+  mysqldb:
+    image: mysql:8.0
+    container_name: mysql-container
+    volumes:
+      - mysql_data:/var/lib/mysql  # Persists database data
+    environment:
+      MYSQL_ROOT_PASSWORD: minthetnaung
+      MYSQL_DATABASE: tasks  # The name of the database to be created
+    ports:
+      - "3307:3306"  # Exposes MySQL on port 3307 of the host
+    networks:
+      - app_network
+
+volumes:
+  mysql_data:  # Defines a volume for MySQL data
+
+networks:
+  app_network:
+    driver: bridge  # Uses a bridge network for inter-container communication
+
+
